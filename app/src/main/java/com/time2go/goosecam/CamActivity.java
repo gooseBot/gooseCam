@@ -170,6 +170,7 @@ public class CamActivity extends Activity {
                 FileOutputStream fos = new FileOutputStream(pictureFile);
                 fos.write(data);
                 fos.close();
+                //mCamera.stopPreview();
                 Log.d(DEBUG_TAG, "Wrote file: " + pictureFile.toString());
             } catch (FileNotFoundException e) {
                 Log.d(DEBUG_TAG, "File not found: " + e.getMessage());
@@ -182,7 +183,7 @@ public class CamActivity extends Activity {
     public void capturePicture(String sessionUID) {
         mSessionID=sessionUID.replaceAll("[^\\d.]", "");
         mCamera.takePicture(null, null, mPicture);
-        mCamera.startPreview();
+
     }
 
     private static File getOutputMediaFile(int type){
