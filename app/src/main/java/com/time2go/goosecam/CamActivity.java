@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.content.pm.PackageManager;
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
+import android.media.CamcorderProfile;
+import android.media.MediaRecorder;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -36,9 +38,12 @@ public class CamActivity extends Activity {
     public final static String DEBUG_TAG = "CamActivity";
 
     private Camera mCamera;
+    private MediaRecorder mMediaRecorder;
     private CameraPreview mPreview;
     public static final int MEDIA_TYPE_IMAGE = 1;
+    public static final int MEDIA_TYPE_VIDEO = 2;
     private static String mSessionID;
+    private boolean isRecording = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,6 +61,7 @@ public class CamActivity extends Activity {
         if (runServer != null) {
             runServer.stopMe();
         }
+        releaseMediaRecorder();       // if you are using MediaRecorder, release it first
         releaseCamera();              // release the camera immediately on pause event
     }
 
@@ -87,6 +93,15 @@ public class CamActivity extends Activity {
             mCamera.setPreviewCallback(null);
             mCamera.release();        // release the camera for other applications
             mCamera = null;
+        }
+    }
+
+    private void releaseMediaRecorder(){
+        if (mMediaRecorder != null) {
+            mMediaRecorder.reset();   // clear recorder configuration
+            mMediaRecorder.release(); // release the recorder object
+            mMediaRecorder = null;
+            mCamera.lock();           // lock camera for later use
         }
     }
 
@@ -182,8 +197,8 @@ public class CamActivity extends Activity {
 
     public void capturePicture(String sessionUID) {
         mSessionID=sessionUID.replaceAll("[^\\d.]", "");
-        mCamera.takePicture(null, null, mPicture);
-
+        //mCamera.takePicture(null, null, mPicture);
+        recordVideo();
     }
 
     private static File getOutputMediaFile(int type){
@@ -205,6 +220,9 @@ public class CamActivity extends Activity {
         if (type == MEDIA_TYPE_IMAGE){
             mediaFile = new File(mediaStorageDir.getPath() + File.separator +
                     "IMG_"+  mSessionID + ".jpg");
+        } else if(type == MEDIA_TYPE_VIDEO) {
+            mediaFile = new File(mediaStorageDir.getPath() + File.separator +
+                    "VID_"+ mSessionID + ".mp4");
         } else {
             return null;
         }
@@ -212,4 +230,58 @@ public class CamActivity extends Activity {
         return mediaFile;
     }
 
+    private boolean prepareVideoRecorder(){
+
+        //mCamera = getCameraInstance();
+        mMediaRecorder = new MediaRecorder();
+        mCamera.unlock();
+
+        mMediaRecorder.setCamera(mCamera);
+        mMediaRecorder.setAudioSource(MediaRecorder.AudioSource.CAMCORDER);
+        mMediaRecorder.setVideoSource(MediaRecorder.VideoSource.CAMERA);
+        mMediaRecorder.setProfile(CamcorderProfile.get(CamcorderProfile.QUALITY_HIGH));
+        mMediaRecorder.setMaxDuration(10000);
+        mMediaRecorder.setOutputFile(getOutputMediaFile(MEDIA_TYPE_VIDEO).toString());
+        //mMediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.);
+        mMediaRecorder.setPreviewDisplay(mPreview.getHolder().getSurface());
+        mMediaRecorder.setOnInfoListener(new MediaRecorder.OnInfoListener() {
+            @Override
+            public void onInfo(MediaRecorder mr, int what, int extra) {
+                if (what == MediaRecorder.MEDIA_RECORDER_INFO_MAX_DURATION_REACHED) {
+                    mr.stop();
+                    releaseMediaRecorder(); // release the MediaRecorder object
+                    mCamera.lock();         // take camera access back from MediaRecorder
+                    isRecording = false;
+                }
+            }
+        });
+
+        try {
+            mMediaRecorder.prepare();
+        } catch (IllegalStateException e) {
+            Log.d(DEBUG_TAG, "IllegalStateException preparing MediaRecorder: " + e.getMessage());
+            releaseMediaRecorder();
+            return false;
+        } catch (IOException e) {
+            Log.d(DEBUG_TAG, "IOException preparing MediaRecorder: " + e.getMessage());
+            releaseMediaRecorder();
+            return false;
+        }
+        return true;
+    }
+
+    public void recordVideo() {
+        if (isRecording) {
+            mMediaRecorder.stop();  // stop the recording
+            releaseMediaRecorder(); // release the MediaRecorder object
+            mCamera.lock();         // take camera access back from MediaRecorder
+            isRecording = false;
+        }
+        if (prepareVideoRecorder()) {
+            mMediaRecorder.start();
+            isRecording = true;
+        } else {
+            releaseMediaRecorder();
+        }
+    }
 }
