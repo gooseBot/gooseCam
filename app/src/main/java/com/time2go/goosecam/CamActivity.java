@@ -196,7 +196,7 @@ public class CamActivity extends Activity {
     };
 
     public void capturePicture(String sessionUID) {
-        mSessionID=sessionUID.replaceAll("[^\\d.]", "");
+        mSessionID=sessionUID.replaceAll("[^\\d]", "");
         //mCamera.takePicture(null, null, mPicture);
         recordVideo();
     }
@@ -240,7 +240,8 @@ public class CamActivity extends Activity {
         mMediaRecorder.setAudioSource(MediaRecorder.AudioSource.CAMCORDER);
         mMediaRecorder.setVideoSource(MediaRecorder.VideoSource.CAMERA);
         mMediaRecorder.setProfile(CamcorderProfile.get(CamcorderProfile.QUALITY_HIGH));
-        mMediaRecorder.setMaxDuration(10000);
+        //mMediaRecorder.setCaptureRate(3);
+        mMediaRecorder.setMaxDuration(8000);
         mMediaRecorder.setOutputFile(getOutputMediaFile(MEDIA_TYPE_VIDEO).toString());
         //mMediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.);
         mMediaRecorder.setPreviewDisplay(mPreview.getHolder().getSurface());
