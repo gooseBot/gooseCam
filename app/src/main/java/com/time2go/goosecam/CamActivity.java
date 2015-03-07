@@ -1,21 +1,15 @@
 package com.time2go.goosecam;
 
 import android.app.Activity;
-import android.content.pm.PackageManager;
-import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
 import android.media.CamcorderProfile;
 import android.media.MediaRecorder;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.util.Log;
-import android.view.SurfaceView;
-import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -24,10 +18,9 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
 
+import org.opencv.
 public class CamActivity extends Activity {
 
     private static final int UDP_SERVER_PORT = 2004;
