@@ -20,7 +20,6 @@ import java.net.DatagramSocket;
 import java.net.SocketException;
 import java.util.List;
 
-import org.opencv.
 public class CamActivity extends Activity {
 
     private static final int UDP_SERVER_PORT = 2004;
