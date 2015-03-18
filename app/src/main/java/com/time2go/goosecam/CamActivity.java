@@ -226,12 +226,20 @@ public class CamActivity extends Activity {
 
         //mCamera = getCameraInstance();
         mMediaRecorder = new MediaRecorder();
-        mCamera.unlock();
+        if (mCamera!=null) mCamera.unlock();
 
         mMediaRecorder.setCamera(mCamera);
-        mMediaRecorder.setAudioSource(MediaRecorder.AudioSource.CAMCORDER);
-        mMediaRecorder.setVideoSource(MediaRecorder.VideoSource.CAMERA);
-        mMediaRecorder.setProfile(CamcorderProfile.get(CamcorderProfile.QUALITY_HIGH));
+        mMediaRecorder.setAudioSource(MediaRecorder.AudioSource.DEFAULT);
+        mMediaRecorder.setVideoSource(MediaRecorder.VideoSource.DEFAULT);
+
+        // Step 3: Set output format and encoding (for versions prior to API Level 8)
+        CamcorderProfile camcorderProfile = CamcorderProfile.get(CamcorderProfile.QUALITY_HIGH);
+        camcorderProfile.videoFrameWidth = 640;
+        camcorderProfile.videoFrameHeight = 480;
+        camcorderProfile.videoCodec = MediaRecorder.VideoEncoder.H264;
+        camcorderProfile.fileFormat = MediaRecorder.OutputFormat.MPEG_4;
+
+        mMediaRecorder.setProfile(camcorderProfile);
         //mMediaRecorder.setCaptureRate(3);
         mMediaRecorder.setMaxDuration(8000);
         mMediaRecorder.setOutputFile(getOutputMediaFile(MEDIA_TYPE_VIDEO).toString());
