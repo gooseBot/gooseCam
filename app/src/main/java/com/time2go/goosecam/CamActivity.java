@@ -241,7 +241,7 @@ public class CamActivity extends Activity {
 
         mMediaRecorder.setProfile(camcorderProfile);
         //mMediaRecorder.setCaptureRate(3);
-        mMediaRecorder.setMaxDuration(8000);
+        mMediaRecorder.setMaxDuration(20000);
         mMediaRecorder.setOutputFile(getOutputMediaFile(MEDIA_TYPE_VIDEO).toString());
         //mMediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.);
         mMediaRecorder.setPreviewDisplay(mPreview.getHolder().getSurface());
